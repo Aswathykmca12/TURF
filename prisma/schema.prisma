@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  pwd      String
+  createAt DateTime @default(now())
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String
+  phone    String  @unique
+  password String
+  orders   Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Manager {
+  id       Int    @id @default(autoincrement())
+  name     String
+  phone    String @unique
+  password String
+  turfs    Turf[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Turf {
+  id              Int     @id @default(autoincrement())
+  name            String
+  place           String
+  amount          Float
+  facilities      String?
+  isCompletedBook Boolean @default(false)
+  managerId       Int
+  manager         Manager @relation(fields: [managerId], references: [id])
+
+  orders        Order[]
+  turfSchedules TurfSchedule[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TurfSchedule {
+  id           Int     @id @default(autoincrement())
+  turfId       Int
+  turf         Turf    @relation(fields: [turfId], references: [id])
+  scheduleTime String
+  isPaid       Boolean @default(false)
+  orders       Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id             Int           @id @default(autoincrement())
+  orderId        String        @default(uuid())
+  cardName       String
+  cardno         String
+  userId         Int
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  turfId         Int
+  turf           Turf          @relation(fields: [turfId], references: [id], onDelete: Cascade)
+  turfScheduleId Int
+  turfSchedule   TurfSchedule  @relation(fields: [turfScheduleId], references: [id], onDelete: Cascade)
+  payment        PaymentStatus @default(COMPLETED) // Enum default without quotes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}

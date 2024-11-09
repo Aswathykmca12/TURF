@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Nunito:300,400,600,700|Poppins:300,400,500,600,700" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="../../../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../../../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../../../assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="../../../assets/vendor/quill/quill.snow.css" rel="stylesheet">
+  <link href="../../../assets/vendor/quill/quill.bubble.css" rel="stylesheet">
+  <link href="../../../assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="../../../assets/vendor/simple-datatables/style.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link rel="stylesheet" href="../../../assets/css/index.css">
+</head>
+<body>
+
+  <main>
+    <div class="container py-5">
+        <div class="row">
+          <!-- Left Column: Details Section -->
+          <div class="col-lg-6 mb-4">
+            <!-- Turf Details Card -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Turf Details</h5>
+              </div>
+              <div class="card-body">
+                <p><strong>Name:</strong> <%= turf.name %></p>
+                <p><strong>Location:</strong> <%= turf.place %></p>
+                <p><strong>Amount:</strong> ₹<%= turf.amount %></p>
+                <p><strong>Availability:</strong> <%= schedule.scheduleTime %></p>
+              </div>
+            </div>
+      
+            <!-- Manager Details Card -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Manager Details</h5>
+              </div>
+              <div class="card-body">
+                <p><strong>Name:</strong> <%= manager.name %></p>
+                <p><strong>Contact:</strong>+91 <%= manager.phone %></p>
+              </div>
+            </div>
+      
+            <!-- User Details Card -->
+            <div class="card shadow-sm">
+              <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Your Details</h5>
+              </div>
+              <div class="card-body">
+                <p><strong>Name:</strong> <%= user.name %></p>
+                <p><strong>Contact:</strong>+91 <%= user.phone %></p>
+              </div>
+            </div>
+          </div>
+      
+          <!-- Right Column: Payment Form -->
+          <div class="col-lg-6">
+            <div class="card shadow-sm">
+              <div class="card-header bg-success text-white text-center">
+                <h5 class="mb-0">Payment Information</h5>
+              </div>
+              <div class="card-body">
+                <form id="paymentForm" action="/order/<%= user.id %>/<%= manager.id %>/<%= turf.id %>/<%= schedule.id %>" method="post">
+
+                <div class="mb-3">
+                    <label for="cardname" class="form-label">Card Holder Name</label>
+                    <input type="text" class="form-control" id="cardname" placeholder="Enter card holder name" name="name" required>
+                </div>
+
+                  <!-- Card Number -->
+                  <div class="mb-3">
+                    <label for="cardNumber" class="form-label">Card Number</label>
+                    <input type="text" class="form-control" id="cardNumber" placeholder="Enter card number" name="cardno" maxlength="19" required>
+                    <div class="invalid-feedback" style="display: none; color: red;">
+                      Invalid card number. Please enter a valid card number.
+                    </div>
+                  </div>
+                  
+                  <!-- CVV and Expiry Date Row -->
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="cvv" class="form-label">CVV</label>
+                      <input type="text" class="form-control" id="cvv" placeholder="CVV" maxlength="3" name="cvv" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="expiryDate" class="form-label">Expiry Date</label>
+                      <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY" name="expiryDate" required>
+                    </div>
+                  </div>
+                  <!-- Amount -->
+                  <div class="mb-3">
+                    <label for="amount" class="form-label">Amount</label>
+                    <input type="text" class="form-control" id="amount" name="amount" value="₹<%= turf.amount %>" readonly disabled>
+                  </div>
+                  <!-- Pay Now Button -->
+                  <div class="text-center">
+                    <button type="submit" class="btn btn-success w-100">Pay Now</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+  </main>
+
+
+  <!-- Vendor JS Files -->
+  <script src="../../../assets/vendor/apexcharts/apexcharts.min.js"></script>
+  <script src="../../../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="../../../assets/vendor/chart.js/chart.umd.js"></script>
+  <script src="../../../assets/vendor/echarts/echarts.min.js"></script>
+  <script src="../../../assets/vendor/quill/quill.min.js"></script>
+  <script src="../../../assets/vendor/simple-datatables/simple-datatables.js"></script>
+  <script src="../../../assets/vendor/tinymce/tinymce.min.js"></script>
+  <script src="../../../assets/vendor/php-email-form/validate.js"></script>
+
+  <!-- Main JS File -->
+  <script src="../../../assets/js/main.js"></script>
+
+  <script>
+    document.getElementById("cardname").addEventListener("input", function(event) {
+      event.target.value = event.target.value.toUpperCase(); // Convert input to uppercase
+    });
+  </script>
+
+  <script>
+    const predefinedCardNumber = "1442 4214 1442 4214";
+    
+    document.getElementById("cardNumber").addEventListener("input", function (event) {
+      let input = event.target.value.replace(/\D/g, ''); // Remove all non-numeric characters
+      input = input.substring(0, 16); // Limit to 16 digits
+  
+      // Format the input as groups of 4 digits
+      event.target.value = input.replace(/(\d{4})(?=\d)/g, '$1 ');
+  
+      // Show or hide invalid feedback based on match with predefined card number
+      if (event.target.value === predefinedCardNumber) {
+        document.querySelector(".invalid-feedback").style.display = "none";
+      } else {
+        document.querySelector(".invalid-feedback").style.display = "block";
+      }
+    });
+  </script>
+
+  <script>
+    const expiryDateInput = document.getElementById("expiryDate");
+
+    expiryDateInput.addEventListener("input", function (event) {
+      let input = event.target.value.replace(/\D/g, ''); // Remove any non-digit characters
+
+      // Add a slash after the month digits
+      if (input.length >= 3) {
+        input = input.substring(0, 2) + '/' + input.substring(2, 4);
+      }
+      
+      // Limit to MM/YY format
+      event.target.value = input.substring(0, 5);
+    });
+  </script>
+
+
+
+</body>
+</html>

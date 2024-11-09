@@ -1,0 +1,98 @@
+<script>
+    const apikey = "193b2ecc88818699b736c69aa1eaf873";
+    
+    document.getElementById("searchForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        
+        const place = document.getElementById("placeInput").value;
+        
+        try {
+            // Fetch turf data
+            const response = await fetch(`/search-turf?place=${encodeURIComponent(place)}`);
+            const turfs = await response.json();
+            console.log(turfs);
+
+            const tbody = document.getElementById("turfTableBody");
+            tbody.innerHTML = ""; // Clear previous results
+
+            for (let index = 0; index < turfs.length; index++) {
+                const turf = turfs[index];
+                
+                // Fetch weather data
+                const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(turf.place)}&appid=${apikey}&units=metric`);
+                const weatherData = await weatherResponse.json();
+                
+                let weatherInfo = '';
+                if (weatherData.cod === 200) {
+                    const weatherDescription = weatherData.weather[0].description;
+                    const temperature = weatherData.main.temp;
+                    const weatherEmoji = getWeatherEmoji(weatherDescription);
+                    weatherInfo = `${weatherEmoji} ${weatherDescription} | ${temperature}°C`;
+                } else {
+                    weatherInfo = 'Weather data not available';
+                }
+
+                `<% if (userActive === true) {  %>`
+                     // Map each schedule to a button link
+                    const scheduleLinks = turf.turfSchedules.length > 0 
+                        ? turf.turfSchedules.map(schedule => 
+                            `<a href="/bookschedule/${turf.id}/${schedule.id}/<%= data.id %>" class="btn btn-outline-danger btn-sm me-1">${schedule.scheduleTime}</a>`
+                          ).join('') // Join buttons without separator
+                        : '<span>No Schedule</span>'; // Show a message if there are no schedules
+                `<% } %>`
+                
+                const row = document.createElement("tr");
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td> <!-- Use the index here -->
+                    <td>${turf.name}</td>
+                    <td>${turf.place}</td>
+                    <td>
+                      <b>${weatherInfo}</b>
+                    </td> <!-- Weather Info -->
+                    <td>${turf.facilities}</td>
+                    <td>${turf.amount} / Hr</td>
+
+                    <% if (userActive === false) { %>
+                      <td>
+                        <h6 class="text-danger">Please Login to book</h6>
+                      </td>
+                    <% } else { %>
+                      <td>
+                        ${scheduleLinks} 
+                      </td>
+                    <% } %>
+                `;
+                
+                tbody.appendChild(row);
+            }
+        } catch (error) {
+            console.error("Error fetching turf details:", error);
+        }
+    });
+
+    function getWeatherEmoji(description) {
+        const weatherEmojis = {
+            clear: '☀️', // Clear sky
+            few: '🌤️', // Few clouds
+            scattered: '🌥️', // Scattered clouds
+            broken: '☁️', // Broken clouds
+            rain: '🌧️', // Rain
+            thunderstorm: '⛈️', // Thunderstorm
+            snow: '❄️', // Snow
+            mist: '🌫️' // Mist
+        };
+
+        // Return the corresponding emoji based on the description
+        if (description.includes('clear')) return weatherEmojis.clear;
+        if (description.includes('few')) return weatherEmojis.few;
+        if (description.includes('scattered')) return weatherEmojis.scattered;
+        if (description.includes('broken')) return weatherEmojis.broken;
+        if (description.includes('rain')) return weatherEmojis.rain;
+        if (description.includes('thunderstorm')) return weatherEmojis.thunderstorm;
+        if (description.includes('snow')) return weatherEmojis.snow;
+        if (description.includes('mist')) return weatherEmojis.mist;
+
+        return '🌈'; // Default emoji if not matched
+    }
+  </script>
